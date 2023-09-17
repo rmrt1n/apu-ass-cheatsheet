@@ -19,5 +19,6 @@ README containing build instructions, and the program source code.
 - [Introduction to C Programming (ICP)](https://github.com/rmrt1n/apu-ass-cheatsheet/tree/main/icp)
 - [Object Oriented Development with Java (OODJ)](https://github.com/rmrt1n/apu-ass-cheatsheet/tree/main/oodj)
 - [Programming for Data Analysis (PFDA)](https://github.com/rmrt1n/apu-ass-cheatsheet/tree/main/pfda)
+- [Data Structures (DSTR)](https://github.com/rmrt1n/apu-ass-cheatsheet/tree/main/dsstr)
 - [Concurrent Programming (CCP)](https://github.com/rmrt1n/apu-ass-cheatsheet/tree/main/ccp)
 - [Real Time Systems (RTS)](https://github.com/rmrt1n/apu-ass-cheatsheet/tree/main/rts)
