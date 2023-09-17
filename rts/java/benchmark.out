@@ -1,0 +1,338 @@
+> Task :app:compileJava UP-TO-DATE
+> Task :app:processResources NO-SOURCE
+> Task :app:classes UP-TO-DATE
+> Task :app:compileTestJava UP-TO-DATE
+> Task :app:processTestResources NO-SOURCE
+> Task :app:testClasses UP-TO-DATE
+> Task :app:compileJmhJava
+> Task :app:processJmhResources NO-SOURCE
+> Task :app:jmhClasses
+
+> Task :app:jmhRunBytecodeGenerator
+Processing 1 classes from /home/rmrt1n/Documents/SEM5/RTS/me/app/build/classes/java/jmh with "reflection" generator
+Writing out Java source to /home/rmrt1n/Documents/SEM5/RTS/me/app/build/jmh-generated-sources and resources to /home/rmrt1n/Documents/SEM5/RTS/me/app/build/jmh-generated-resources
+Processing 1 classes from /home/rmrt1n/Documents/SEM5/RTS/me/app/build/classes/java/test with "reflection" generator
+Writing out Java source to /home/rmrt1n/Documents/SEM5/RTS/me/app/build/jmh-generated-sources and resources to /home/rmrt1n/Documents/SEM5/RTS/me/app/build/jmh-generated-resources
+
+> Task :app:jmhCompileGeneratedClasses
+> Task :app:jmhJar
+
+> Task :app:jmh
+# JMH version: 1.36
+# VM version: JDK 17.0.6, OpenJDK 64-Bit Server VM, 17.0.6+10
+# VM invoker: /usr/lib/jvm/java-17-openjdk-17.0.6.0.10-1.fc36.x86_64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/rmrt1n/Documents/SEM5/RTS/me/app/build/tmp/jmh -Duser.country=US -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 10 s each
+# Measurement: 5 iterations, 10 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Throughput, ops/time
+# Benchmark: rts.MyBenchmark.benchmark
+
+# Run progress: 0.00% complete, ETA 00:03:30
+# Fork: 1 of 1
+# Warmup Iteration   1: simulation started
+simulation completed
+≈ 10⁻⁵ ops/ms
+
+# Warmup Iteration   2: simulation started
+simulation completed
+≈ 10⁻⁵ ops/ms
+
+Iteration   1: simulation started
+simulation completed
+≈ 10⁻⁵ ops/ms
+
+Iteration   2: simulation started
+simulation completed
+≈ 10⁻⁵ ops/ms
+
+Iteration   3: simulation started
+simulation completed
+≈ 10⁻⁵ ops/ms
+
+Iteration   4: simulation started
+simulation completed
+≈ 10⁻⁵ ops/ms
+
+Iteration   5: simulation started
+simulation completed
+≈ 10⁻⁵ ops/ms
+
+
+Result "rts.MyBenchmark.benchmark":
+  ≈ 10⁻⁵ ops/ms
+
+
+# JMH version: 1.36
+# VM version: JDK 17.0.6, OpenJDK 64-Bit Server VM, 17.0.6+10
+# VM invoker: /usr/lib/jvm/java-17-openjdk-17.0.6.0.10-1.fc36.x86_64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/rmrt1n/Documents/SEM5/RTS/me/app/build/tmp/jmh -Duser.country=US -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 10 s each
+# Measurement: 5 iterations, 10 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: rts.MyBenchmark.benchmark
+
+# Run progress: 33.33% complete, ETA 00:09:23
+# Fork: 1 of 1
+# Warmup Iteration   1: simulation started
+simulation completed
+40360.335 ms/op
+
+# Warmup Iteration   2: simulation started
+simulation completed
+40096.945 ms/op
+
+Iteration   1: simulation started
+simulation completed
+40064.460 ms/op
+
+Iteration   2: simulation started
+simulation completed
+40136.996 ms/op
+
+Iteration   3: simulation started
+simulation completed
+40622.023 ms/op
+
+Iteration   4: simulation started
+simulation completed
+40075.916 ms/op
+
+Iteration   5: simulation started
+simulation completed
+40046.654 ms/op
+
+
+Result "rts.MyBenchmark.benchmark":
+  40189.210 ±(99.9%) 940.799 ms/op [Average]
+  (min, avg, max) = (40046.654, 40189.210, 40622.023), stdev = 244.322
+  CI (99.9%): [39248.412, 41130.009] (assumes normal distribution)
+
+
+# JMH version: 1.36
+# VM version: JDK 17.0.6, OpenJDK 64-Bit Server VM, 17.0.6+10
+# VM invoker: /usr/lib/jvm/java-17-openjdk-17.0.6.0.10-1.fc36.x86_64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/rmrt1n/Documents/SEM5/RTS/me/app/build/tmp/jmh -Duser.country=US -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 10 s each
+# Measurement: 5 iterations, 10 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Sampling time
+# Benchmark: rts.MyBenchmark.benchmark
+
+# Run progress: 66.66% complete, ETA 00:04:41
+# Fork: 1 of 1
+# Warmup Iteration   1: simulation started
+simulation completed
+40332.427 ms/op
+
+# Warmup Iteration   2: simulation started
+simulation completed
+40063.992 ms/op
+
+Iteration   1: simulation started
+simulation completed
+40063.992 ms/op
+                 benchmark·p0.00:   40063.992 ms/op
+                 benchmark·p0.50:   40063.992 ms/op
+                 benchmark·p0.90:   40063.992 ms/op
+                 benchmark·p0.95:   40063.992 ms/op
+                 benchmark·p0.99:   40063.992 ms/op
+                 benchmark·p0.999:  40063.992 ms/op
+                 benchmark·p0.9999: 40063.992 ms/op
+                 benchmark·p1.00:   40063.992 ms/op
+
+Iteration   2: simulation started
+simulation completed
+41741.713 ms/op
+                 benchmark·p0.00:   41741.713 ms/op
+                 benchmark·p0.50:   41741.713 ms/op
+                 benchmark·p0.90:   41741.713 ms/op
+                 benchmark·p0.95:   41741.713 ms/op
+                 benchmark·p0.99:   41741.713 ms/op
+                 benchmark·p0.999:  41741.713 ms/op
+                 benchmark·p0.9999: 41741.713 ms/op
+                 benchmark·p1.00:   41741.713 ms/op
+
+Iteration   3: simulation started
+simulation completed
+39996.883 ms/op
+                 benchmark·p0.00:   39996.883 ms/op
+                 benchmark·p0.50:   39996.883 ms/op
+                 benchmark·p0.90:   39996.883 ms/op
+                 benchmark·p0.95:   39996.883 ms/op
+                 benchmark·p0.99:   39996.883 ms/op
+                 benchmark·p0.999:  39996.883 ms/op
+                 benchmark·p0.9999: 39996.883 ms/op
+                 benchmark·p1.00:   39996.883 ms/op
+
+Iteration   4: simulation started
+simulation completed
+39996.883 ms/op
+                 benchmark·p0.00:   39996.883 ms/op
+                 benchmark·p0.50:   39996.883 ms/op
+                 benchmark·p0.90:   39996.883 ms/op
+                 benchmark·p0.95:   39996.883 ms/op
+                 benchmark·p0.99:   39996.883 ms/op
+                 benchmark·p0.999:  39996.883 ms/op
+                 benchmark·p0.9999: 39996.883 ms/op
+                 benchmark·p1.00:   39996.883 ms/op
+
+Iteration   5: simulation started
+simulation completed
+39996.883 ms/op
+                 benchmark·p0.00:   39996.883 ms/op
+                 benchmark·p0.50:   39996.883 ms/op
+                 benchmark·p0.90:   39996.883 ms/op
+                 benchmark·p0.95:   39996.883 ms/op
+                 benchmark·p0.99:   39996.883 ms/op
+                 benchmark·p0.999:  39996.883 ms/op
+                 benchmark·p0.9999: 39996.883 ms/op
+                 benchmark·p1.00:   39996.883 ms/op
+
+
+Result "rts.MyBenchmark.benchmark":
+  N = 5
+  mean =  40359.271 ±(99.9%) 2977.915 ms/op
+
+  Histogram, ms/op:
+    [39000.000, 39250.000) = 0 
+    [39250.000, 39500.000) = 0 
+    [39500.000, 39750.000) = 0 
+    [39750.000, 40000.000) = 3 
+    [40000.000, 40250.000) = 1 
+    [40250.000, 40500.000) = 0 
+    [40500.000, 40750.000) = 0 
+    [40750.000, 41000.000) = 0 
+    [41000.000, 41250.000) = 0 
+    [41250.000, 41500.000) = 0 
+    [41500.000, 41750.000) = 1 
+
+  Percentiles, ms/op:
+      p(0.0000) =  39996.883 ms/op
+     p(50.0000) =  39996.883 ms/op
+     p(90.0000) =  41741.713 ms/op
+     p(95.0000) =  41741.713 ms/op
+     p(99.0000) =  41741.713 ms/op
+     p(99.9000) =  41741.713 ms/op
+     p(99.9900) =  41741.713 ms/op
+     p(99.9990) =  41741.713 ms/op
+     p(99.9999) =  41741.713 ms/op
+    p(100.0000) =  41741.713 ms/op
+
+
+# JMH version: 1.36
+# VM version: JDK 17.0.6, OpenJDK 64-Bit Server VM, 17.0.6+10
+# VM invoker: /usr/lib/jvm/java-17-openjdk-17.0.6.0.10-1.fc36.x86_64/bin/java
+# VM options: -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/rmrt1n/Documents/SEM5/RTS/me/app/build/tmp/jmh -Duser.country=US -Duser.language=en -Duser.variant
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, single-shot each
+# Measurement: 5 iterations, single-shot each
+# Timeout: 10 min per iteration
+# Threads: 1 thread
+# Benchmark mode: Single shot invocation time
+# Benchmark: rts.MyBenchmark.benchmark
+
+# Run progress: 100.00% complete, ETA 00:00:00
+# Fork: 1 of 1
+# Warmup Iteration   1: simulation started
+simulation completed
+41394.224 ms/op
+
+# Warmup Iteration   2: simulation started
+simulation completed
+40091.390 ms/op
+
+Iteration   1: simulation started
+simulation completed
+40065.623 ms/op
+
+Iteration   2: simulation started
+simulation completed
+40059.197 ms/op
+
+Iteration   3: simulation started
+simulation completed
+40050.738 ms/op
+
+Iteration   4: simulation started
+simulation completed
+40042.814 ms/op
+
+Iteration   5: simulation started
+simulation completed
+40164.624 ms/op
+
+
+Result "rts.MyBenchmark.benchmark":
+  N = 5
+  mean =  40076.599 ±(99.9%) 192.358 ms/op
+
+  Histogram, ms/op:
+    [40000.000, 40012.500) = 0 
+    [40012.500, 40025.000) = 0 
+    [40025.000, 40037.500) = 0 
+    [40037.500, 40050.000) = 1 
+    [40050.000, 40062.500) = 2 
+    [40062.500, 40075.000) = 1 
+    [40075.000, 40087.500) = 0 
+    [40087.500, 40100.000) = 0 
+    [40100.000, 40112.500) = 0 
+    [40112.500, 40125.000) = 0 
+    [40125.000, 40137.500) = 0 
+    [40137.500, 40150.000) = 0 
+    [40150.000, 40162.500) = 0 
+    [40162.500, 40175.000) = 1 
+    [40175.000, 40187.500) = 0 
+
+  Percentiles, ms/op:
+      p(0.0000) =  40042.814 ms/op
+     p(50.0000) =  40059.197 ms/op
+     p(90.0000) =  40164.624 ms/op
+     p(95.0000) =  40164.624 ms/op
+     p(99.0000) =  40164.624 ms/op
+     p(99.9000) =  40164.624 ms/op
+     p(99.9900) =  40164.624 ms/op
+     p(99.9990) =  40164.624 ms/op
+     p(99.9999) =  40164.624 ms/op
+    p(100.0000) =  40164.624 ms/op
+
+
+# Run complete. Total time: 00:18:49
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise
+extra caution when trusting the results, look into the generated code to check the benchmark still
+works, and factor in a small probability of new VM bugs. Additionally, while comparisons between
+different JVMs are already problematic, the performance difference caused by different Blackhole
+modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.
+
+Benchmark                                  Mode  Cnt      Score      Error   Units
+MyBenchmark.benchmark                     thrpt    5     ≈ 10⁻⁵             ops/ms
+MyBenchmark.benchmark                      avgt    5  40189.210 ±  940.799   ms/op
+MyBenchmark.benchmark                    sample    5  40359.271 ± 2977.915   ms/op
+MyBenchmark.benchmark:benchmark·p0.00    sample       39996.883              ms/op
+MyBenchmark.benchmark:benchmark·p0.50    sample       39996.883              ms/op
+MyBenchmark.benchmark:benchmark·p0.90    sample       41741.713              ms/op
+MyBenchmark.benchmark:benchmark·p0.95    sample       41741.713              ms/op
+MyBenchmark.benchmark:benchmark·p0.99    sample       41741.713              ms/op
+MyBenchmark.benchmark:benchmark·p0.999   sample       41741.713              ms/op
+MyBenchmark.benchmark:benchmark·p0.9999  sample       41741.713              ms/op
+MyBenchmark.benchmark:benchmark·p1.00    sample       41741.713              ms/op
+MyBenchmark.benchmark                        ss    5  40076.599 ±  192.358   ms/op
+
+Benchmark result is saved to /home/rmrt1n/Documents/SEM5/RTS/me/app/build/results/jmh/results.txt
+
+BUILD SUCCESSFUL in 18m 54s
+7 actionable tasks: 5 executed, 2 up-to-date

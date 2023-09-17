@@ -1,0 +1,8 @@
+student_id,student_name,student_date_joined,student_email,student_password,student_phone,student_address
+1,martin,12-12-2020,1@email.com,e10adc3949ba59abbe56e057f20f883e,09834,nowher
+2,kk,12-12-2020,kk@email.com,25d55ad283aa400af464c76d713c07ad,123,
+3,john,12-12-2020,johnsmith@email.com,7b8b965ad4bca0e41ab51de7b31363a1,123,123
+4,stark,12-12-2020,tonystark@email.com,25d55ad283aa400af464c76d713c07ad,,
+5,jjj,12-12-2020,a,7b8b965ad4bca0e41ab51de7b31363a1,,
+6,ryan,20-01-2021,ryan.mrt1n@gmail.com,4e3ab19467222ea9ab20c92cb311eb35,,
+7,sock,22-01-2021,sock@email.com,25d55ad283aa400af464c76d713c07ad,,

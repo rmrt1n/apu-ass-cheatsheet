@@ -1,0 +1,7 @@
+vcc_id,vcc_name,vcc_location,vcc_capacity,vcc_deleted
+1,National Stadium,Bukit Jalil,1000,0
+2,Centre,Cheras,44,1
+3,APU,Bukit Jalil,200,0
+4,KL Convention Centre,KLCC,1000,0
+5,Hospital Kuala Lumpur,Kuala Lumpur,500,0
+6,WTCKL,Chow Kit,800,0

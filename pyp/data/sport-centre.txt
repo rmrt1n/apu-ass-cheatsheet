@@ -1,0 +1,6 @@
+sport_centre_id,sport_centre_name,sport_centre_location
+1,sport centre a,kuala lumpur
+2,sport centre b,johor bahru
+3,sport centre c,penang
+4,sport centre d,melaka
+5,sport centre d,kuala lumpur

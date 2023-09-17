@@ -1,0 +1,8 @@
+warmup 1: 38848
+warmup 2: 38601
+iteration 1: 38617
+iteration 2: 38586
+iteration 3: 39166
+iteration 4: 38641
+iteration 5: 38741
+avg: 38750.2

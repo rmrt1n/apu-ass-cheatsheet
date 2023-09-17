@@ -1,0 +1,1381 @@
+---
+title: "RYAN MARTIN - TP058091"
+output:
+  html_notebook:
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    code_folding: hide
+  # word_document: default
+---
+
+<!-- 
+This file contains the full analysis for this assignment. To get only 
+the code included in the word document, check the RScript file.
+The html document generated is also included here so there's no need to render 
+it manually.
+-->
+
+## 1.0 Setup
+```{r include = FALSE}
+# don't include messages
+knitr::opts_chunk$set(message = FALSE)
+```
+
+### 1.1 Import Libraries
+```{r class.source = 'fold-show'}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+# set ggplot theme
+theme_set(theme_light())
+```
+
+### 1.2 Import Data
+```{r class.source = 'fold-show'}
+df <- readr::read_csv('employee_attrition.csv')
+head(df, 20)
+```
+The date variables seems to be in a format unfamiliar to R. This will be corrected 
+in the preprocessing stage. The gender variable is split into 2 columns, `gender_full`
+and `gender_short`. Only 1 is needed so I'll drop one of them.
+
+## 2.0 Preprocessing
+```{r class.source = 'fold-show'}
+df <- df %>%
+  mutate(
+    recorddate_key = as.Date(recorddate_key, '%m/%d/%Y'),
+    birthdate_key = as.Date(birthdate_key, '%m/%d/%Y'),
+    orighiredate_key = as.Date(orighiredate_key, '%m/%d/%Y'),
+    terminationdate_key = as.Date(terminationdate_key, '%m/%d/%Y'),
+    termreason_desc = ifelse(termreason_desc == 'Resignaton',
+                             'Resignation',
+                             termreason_desc),
+    city_name = ifelse(city_name == 'New Westminister',
+                       'New Westminster',
+                       city_name),
+    store_name = as.factor(store_name)) %>%
+    select(-gender_short)
+
+# df with 1 record for each employee
+df2 <- df %>%
+  group_by(EmployeeID) %>%
+  filter(STATUS_YEAR == max(STATUS_YEAR)) %>%
+  filter(!(n() > 1 & termreason_desc == 'Not Applicable')) %>%
+  ungroup()
+```
+Here I'm converting the date columns to Date type and fixed some typos. I also 
+made a new dataframe containing only the latest record of each employee, which 
+will make working with the data easier.
+
+
+```{r}
+df2
+```
+Here is the new dataframe.
+
+## 3.0 Univariate Analysis {.tabset}
+### 3.1 Number of Employees
+```{r}
+df %>% count(EmployeeID) %>% nrow()
+```
+The Number of distinct employees is same as the number of rows in the new data 
+frame. This validates the data transformation in the previous section.
+
+### 3.2 Date Variables
+**Record Date**
+```{r}
+summary(df$recorddate_key)
+```
+**Birth Date**
+```{r}
+summary(df$birthdate_key)
+```
+**Original Hire Date**
+```{r}
+summary(df$orighiredate_key)
+```
+**Termination Date**
+```{r}
+summary(df$terminationdate_key)
+```
+The date `1900-01-01` in the this column means the employee is still active 
+(still working).
+
+### 3.3 Age
+**Age Summary**
+```{r}
+summary(df2$age)
+```
+```{r}
+df2 %>%
+  ggplot(aes(age)) +
+  geom_histogram(binwidth = 2) + 
+  scale_x_continuous(breaks = seq(20, 70, 5)) +
+  labs(
+    title = 'Distribution of Employee Age',
+    x = 'Age',
+    y = 'Count'
+  )
+
+```
+Age distribution seems uniform, with an unexpectedly high number of employees 
+above the age of 60.
+
+### 3.4 Length of Service (Tenure)
+**Length of Service Summary**
+```{r}
+summary(df2$length_of_service)
+```
+```{r}
+df2 %>%
+  ggplot(aes(length_of_service)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = seq(0, 30, 1)) +
+  labs(
+    title = 'Distribution of Employee Tenure',
+    x = 'Tenure',
+    y = 'Count'
+  )
+```
+13 years tenure is the most common among the employees here.
+
+### 3.5 City Name
+```{r}
+df2 %>%
+  count(city_name) %>%
+  ggplot(aes(n, reorder(city_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Employee by City',
+    x = 'Number of Employees',
+    y = 'City Name'
+  )
+
+df2 %>% count(city_name) %>% arrange(desc(n))
+```
+
+### 3.6 Department Name
+```{r}
+df2 %>%
+  count(department_name) %>%
+  ggplot(aes(n, reorder(department_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Employee by Department',
+    x = 'Number of Employees',
+    y = 'Department Name'
+  )
+
+df2 %>% count(department_name) %>% arrange(desc(n))
+```
+The top 6 departments have the most employees. These departments are under the 
+stores business unit, which in general should have more employees than the 
+head offices.
+
+### 3.7 Job Title
+```{r}
+df2 %>%
+  count(job_title) %>%
+  ggplot(aes(n, reorder(job_title, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Employee by Job Title',
+    x = 'Number of Employees',
+    y = 'Job Title'
+  )
+
+df2 %>% count(job_title) %>% arrange(desc(n))
+```
+Same as the previous sections, the jobs with more employees belong to the stores 
+departments.
+
+### 3.8 Store Name
+```{r}
+df2 %>%
+  count(store_name) %>%
+  ggplot(aes(n, reorder(store_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Employee by Store',
+    x = 'Number of Employees',
+    y = 'Store Name'
+  )
+
+df2 %>% count(store_name) %>% arrange(desc(n))
+```
+Some stores have very little employee data (some less than 10). The cause of this
+might be an issue with the data colletion, or some other reason. This might affect 
+analyses using this column, so I will exclude some of the stores before that. The 
+excluded stores will be the ones with employees less than the 1st quantile value 
+of the column.
+
+### 3.9 Gender
+```{r}
+df2 %>%
+  count(gender_full) %>%
+  ggplot(aes(n, reorder(gender_full, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Employee by Gender',
+    x = 'Number of Employees',
+    y = 'Gender'
+  )
+
+df2 %>% count(gender_full) %>% arrange(desc(n))
+```
+
+### 3.10 Termination Reason
+```{r}
+df2 %>%
+  count(termreason_desc) %>%
+  ggplot(aes(n, reorder(termreason_desc, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Employee by Termination Reason',
+    x = 'Number of Employees',
+    y = 'Termination Reason'
+  )
+
+df2 %>% count(termreason_desc) %>% arrange(desc(n))
+```
+Most of the employees are still active. For the later analyses, I will be focusing 
+mostly on the terminated employee data.
+
+### 3.11 Termination Type
+```{r}
+df2 %>%
+  count(termtype_desc) %>%
+  ggplot(aes(n, reorder(termtype_desc, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Employee by Termination Type',
+    x = 'Number of Employees',
+    y = 'Termination Type'
+  )
+
+df2 %>% count(termtype_desc) %>% arrange(desc(n))
+```
+Here I'm checking for inconsistent data. There is no voluntary layoffs and
+involuntary retirements & resignations, so the data is correct here. 
+
+### 3.12 Status
+```{r}
+df2 %>%
+  count(STATUS) %>%
+  ggplot(aes(n, reorder(STATUS, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Employee by Status',
+    x = 'Number of Employees',
+    y = 'Status'
+  )
+
+df2 %>% count(STATUS) %>% arrange(desc(n))
+```
+
+### 3.13 Status Year
+```{r}
+df %>%
+  count(STATUS_YEAR) %>%
+  ggplot(aes(n, as.factor(STATUS_YEAR))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Records by Status Year',
+    x = 'Count',
+    y = 'Status Year'
+  )
+
+df %>% count(STATUS_YEAR) %>% arrange(desc(n))
+```
+The records are collected from 2006 to 2015, although there are some records in 
+the data that start way earlier. I'm assuming that this data have been collected 
+since before 2006, but it has just started being compiled in that year. Or another 
+explanation could be that this data is just a subset of a much larger dataset.
+
+### 3.14 Business Unit
+```{r}
+df2 %>%
+  ggplot(aes(BUSINESS_UNIT)) +
+  geom_bar() +
+  labs(
+    title = 'Count of Employees by Business Unit',
+    x = 'Business Unit',
+    y = 'Number of Employees'
+  )
+
+df2 %>% count(BUSINESS_UNIT) %>% arrange(desc(n))
+```
+
+## 4.0 Question 1: What Factors Lead to Employee Termination?
+For this question, I will be focusing mostly on employee resignation. Retirement 
+is for aging employees, so there isn't any need to find out what is making 
+employees retire. Layoffs on the other hand is quite difficult to analyze because 
+they are mostly due to the company's decision [[ref]](https://www.indeed.com/career-advice/career-development/reasons-for-layoffs). 
+
+### 4.1 Analyses
+#### 4.1.1 Terminations Over The Years
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED') %>%
+  count(STATUS_YEAR, termreason_desc) %>%
+  ggplot(aes(STATUS_YEAR, n, color = termreason_desc)) +
+  geom_line() +
+  scale_x_continuous(breaks = seq(2006, 2015)) +
+  scale_y_continuous(breaks = seq(0, 150, 25)) +
+  labs(
+    title = 'Count of Terminations Over The Years Grouped by Reason',
+    x = 'Year',
+    y = 'Termination Count',
+    color = 'Termination Reason'
+  )
+```
+Layoffs for some reason happened only on 2014.and 2015. This might indicate an 
+incident happened to the company during those 2 years. However, there isn't enough 
+information in the dataset to further explore why this happened.
+
+#### 4.1.2 Age of Termination {.tabset}
+##### 4.1.2.1 Age of Resignations
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Resignation') %>%
+  ggplot(aes(age)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = seq(10, 70, 2)) +
+  labs(
+    title = 'Distribution of Age of Employee at Resignation',
+    x = 'Age',
+    y = 'Number of Employees'
+  )
+```
+Most of the resignations are done by employees between the age of 20 and 30. Age 
+might be one of the factors of resignation. Further analysis on this is needed.
+
+##### 4.1.2.2 Age of Retirements
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Retirement') %>%
+  ggplot(aes(age)) +
+  geom_histogram() +
+  labs(
+    title = 'Distribution of Age of Employee at Retirement',
+    x = 'Age',
+    y = 'Number of Employees'
+  )
+```
+As expected, only old people retire.
+
+##### 4.1.2.3 Age of Layoffs
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Layoff') %>%
+  ggplot(aes(age)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = seq(10, 70, 2)) +
+  labs(
+    title = 'Distribution of Age of Employee at Layoff',
+    x = 'Age',
+    y = 'Number of Employees'
+  )
+```
+No obvious patterns here. There's an unusually high number of employees in their 
+60s being laid off. A possible explanation to this is because the older employees 
+refuse to retire, and the company no longer has the need for them, so they are 
+laid off.
+
+#### 4.1.3 Length of Service (Tenure) {.tabset}
+##### 4.1.3.1 Tenure Until Resignation
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Resignation') %>%
+  ggplot(aes(length_of_service)) +
+  geom_histogram(binwidth = 1) +
+  labs(
+    title = 'Distribution of Tenure of Employee at Resignation',
+    x = 'Tenure',
+    y = 'Number of Employees'
+  )
+```
+The distribution for this looks similiar to the distribution for the age of 
+resignation. These 2 variables might be correlated, and a simple explanation for 
+this would be that the older someone is when they resigned, the longer they must 
+have worked. However this isn't universal so it's best not to conclude anything 
+to quickly.
+
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED') %>%
+  ggplot(aes(age, length_of_service, color = termreason_desc)) +
+  geom_point() +
+  labs(
+    title = 'Correlation of Age with Tenure of Terminated Employees',
+    x = 'Age',
+    y = 'Tenure',
+    color = 'Termination Reason'
+  )
+```
+As seen in the scatter plot above, these 2 variables do show a positive correlation.
+The pearson correlation coefficient is:
+
+```{r}
+cor(df2$age, df2$length_of_service)
+```
+A high correlation, good to know but this doesn't help much in answering the 
+original question.
+
+##### 4.1.3.2 Tenure Until Retirement
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Retirement') %>%
+  ggplot(aes(length_of_service)) +
+  geom_histogram(binwidth = 1) +
+  labs(
+    title = 'Distribution of Tenure of Employee at Retirement',
+    x = 'Tenure',
+    y = 'Number of Employees'
+  )
+```
+
+##### 4.1.3.3 Tenure Until Layoff
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Layoff') %>%
+  ggplot(aes(length_of_service)) +
+  geom_histogram(binwidth = 1) +
+  labs(
+    title = 'Distribution of Tenure of Employee at Layoff',
+    x = 'Tenure',
+    y = 'Number of Employees'
+  )
+```
+Again here, no obvious patterns for layoffs.
+
+
+#### 4.1.5 Gender
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED') %>%
+  count(gender_full, termreason_desc) %>%
+  ggplot(aes(gender_full, n)) +
+  geom_bar(stat = 'identity') +
+  facet_wrap(~termreason_desc) +
+  labs(
+    title = 'Comparison of Employee Gender Grouped by Termination Reason',
+    x = 'Gender',
+    y = 'Number of Employees'
+  )
+```
+From the charts above, we can see that female employees are terminated more than 
+male employees. But, since there are more female workers than male, a different 
+approach is needed to analyse the relationship between gender and termination. 
+Further analysis on this will be in the later section.
+
+#### 4.1.6 City {.tabset}
+##### 4.1.6.1 Resignations by City
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Resignation') %>%
+  count(city_name) %>%
+  ggplot(aes(n, reorder(city_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Resignations Grouped by City',
+    x = 'Number of Employees',
+    y = 'City Name'
+  )
+```
+The chart above is similiar to the counts from section [3.5](#city-name). This 
+variable doesn't seem to influence resignation much, or at all.
+
+##### 4.1.6.2 Retirements by City
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Retirement') %>%
+  count(city_name) %>%
+  ggplot(aes(n, reorder(city_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Retirements Grouped by City',
+    x = 'Number of Employees',
+    y = 'City Name'
+  )
+```
+This is same as resignations.
+
+##### 4.1.6.3 Layoffs by City
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Layoff') %>%
+  count(city_name) %>%
+  ggplot(aes(n, reorder(city_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Layoffs Grouped by City',
+    x = 'Number of Employees',
+    y = 'City Name'
+  )
+```
+On the other hand, the cities here are very different from the previous 2. These 
+cities might influence layoff in a way. Further analysis is needed.
+
+#### 4.1.7 Department {.tabset}
+##### 4.1.7.1 Resignations by Department
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Resignation') %>%
+  count(department_name, termreason_desc) %>%
+  ggplot(aes(n, reorder(department_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Resignations by Grouped by Department',
+    x = 'Number of Employees',
+    y = 'Department Name'
+  )
+```
+The stores unit departments have high resignation counts. This could be a factor 
+in employee termination.
+
+##### 4.1.7.2 Retirements by Department
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Retirement') %>%
+  count(department_name, termreason_desc) %>%
+  ggplot(aes(n, reorder(department_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Retirements by Grouped by Department',
+    x = 'Number of Employees',
+    y = 'Department Name'
+  )
+```
+The top departments are slightly different from the other two, but the point is 
+still the same as the others.
+
+##### 4.1.7.3 Layoffs by Department
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Layoff') %>%
+  count(department_name, termreason_desc) %>%
+  ggplot(aes(n, reorder(department_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Layoffs by Grouped by Department',
+    x = 'Number of Employees',
+    y = 'Department Name'
+  )
+```
+Same as the others, with a notable difference being that only employees from the 
+stores business unit is being laid off.
+
+#### 4.1.8 Job Title {.tabset}
+##### 4.1.8.1 Resignations by Job
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Resignation') %>%
+  count(job_title, termreason_desc) %>%
+  ggplot(aes(n, reorder(job_title, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Resignations by Grouped by Job Title',
+    x = 'Number of Employees',
+    y = 'Job Title'
+  )
+```
+Grouping by job title results in a chart similiar to the one with departments as 
+the group. Jobs belong to a department, so the values in the previous section 
+can explained here. Further analysis on this will be in the later section.
+
+##### 4.1.8.2 Retirements by Job
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Retirement') %>%
+  count(job_title, termreason_desc) %>%
+  ggplot(aes(n, reorder(job_title, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Retirements by Grouped by Job Title',
+    x = 'Number of Employees',
+    y = 'Job Title'
+  )
+```
+
+##### 4.1.8.3 Layoffs by Job
+```{r}
+df2 %>%
+  filter(termreason_desc == 'Layoff') %>%
+  count(job_title, termreason_desc) %>%
+  ggplot(aes(n, reorder(job_title, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Layoffs by Grouped by Job Title',
+    x = 'Number of Employees',
+    y = 'Job Title'
+  )
+```
+
+#### 4.1.9 Business Unit
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED') %>% 
+  count(BUSINESS_UNIT, termreason_desc) %>%
+  group_by(BUSINESS_UNIT) %>%
+  mutate(ng = sum(n),
+         np = round(n / ng, 2) * 100) %>%
+  ggplot(aes(n, BUSINESS_UNIT,
+             fill = termreason_desc,
+             label = paste(np, '%', ' (', n, ')'))) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  geom_text(position = position_fill(vjust = 0.5), size = 3) +
+  labs(
+    title = 'Ratio of Termination Reasons In Business Units',
+    x = 'Percentage',
+    y = 'Business Unit',
+    fill = 'Termination Reason'
+  )
+```
+Nothing much here except that almost all of the employees in the head office 
+units end up retiring.
+
+#### 4.1.10 Store {.tabset}
+##### 4.1.10.1 Resignations by Store
+```{r}
+# some stores have very little employees so I filtered the data to include only 
+# the stores with employees above the 1st quantile of employee number.
+q1 <- df2 %>% count(store_name) %>% .$n %>% quantile(.25)
+
+store <- df2 %>%
+  group_by(store_name) %>%
+  filter(n() >= q1) %>%
+  ungroup()
+
+store %>%
+  filter(termreason_desc == 'Resignation') %>%
+  count(store_name, termreason_desc) %>%
+  ggplot(aes(n, reorder(store_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Resignations Grouped by Store',
+    x = 'Number of Employees',
+    y = 'Store Name'
+  )
+```
+Getting resignation patterns from the store alone is difficult. This variable 
+might not affect resignation much.
+
+##### 4.1.10.2 Retirements by Store
+```{r}
+store %>%
+  filter(termreason_desc == 'Retirement') %>%
+  count(store_name, termreason_desc) %>%
+  ggplot(aes(n, reorder(store_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Retirements Grouped by Store',
+    x = 'Number of Employees',
+    y = 'Store Name'
+  )
+```
+Same as resignation.
+
+##### 4.1.10.3 Layoffs by Store
+```{r}
+store %>%
+  filter(termreason_desc == 'Layoff') %>%
+  count(store_name, termreason_desc) %>%
+  ggplot(aes(n, reorder(store_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Layoffs Grouped by Store',
+    x = 'Number of Employees',
+    y = 'Store Name'
+  )
+```
+Unlike the other termination reasons, layoffs only happen to a few stores as 
+shown in this chart. This might indicate stores being a factor of employee layoffs. 
+Also, this could explain the findings from section [4.1.6.3](#layoffs-by-city). 
+Further analysis on this will be on the later section.
+
+### 4.2 Answer
+Based on the above analyses, the factors I have identified are:  
+
+* Age
+* Gender
+* Job & Department
+* Store
+
+From these factors, additional analyses will be done to understand how they are 
+affecting attrition.
+
+## 5.0 Question 2: How Does Age Affect Employee Attrition?
+The relationship between termination age and attrition has been discussed in the 
+previous section. In this section, I will be focusing on the hire age, which is 
+the age at which the employee was hired into the company.
+
+### 5.1 Analyses
+#### 5.1.1 Age During Hire
+```{r}
+# new dataframe with employee age during hire
+df3 <- df2 %>% mutate(hire_age = age - (STATUS_YEAR - year(orighiredate_key)))
+
+df3 %>%
+  ggplot(aes(hire_age)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = seq(19, 55)) +
+  labs(
+    title = 'Distribution of Age of Employees at Hire',
+    x = 'Hire Age',
+    y = 'Number of Employees'
+  )
+```
+Most of the employees were between the age of 20 and 40 at the time of hiring. 
+There's also a high number of employees aged 51-52, but not many employees in 
+their 40s during hire.
+
+#### 5.1.2 Age During Hire and Termination {.tabset}
+##### 5.1.2.1 Termination Reason by Hire Age (percentage)
+```{r}
+df3 %>%
+  filter(STATUS == 'TERMINATED') %>%
+  count(hire_age, termreason_desc) %>%
+  group_by(hire_age) %>%
+  mutate(ng = sum(n),
+         np = round(n / ng, 2) * 100) %>%
+  ggplot(aes(n, as.factor(hire_age),
+             fill = termreason_desc,
+             label = paste(np, '%', sep = ''))) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  geom_text(position = position_fill(vjust = 0.5)) +
+  labs(
+    title = 'Ratio of Termination Reasons in Hire Ages (Percentage)',
+    x = 'Percentage',
+    y = 'Hire Age',
+    fill = 'Termination Reason'
+  )
+```
+When comparing the termination reasons with employee age of hire, we can see 
+patterns in data. From the chart above, we can see that employees hired at a 
+younger age tend to resign more. The opposite happens to employees hired at an 
+older age, as they tend to get laid off more (excluding ages 40 and above, which 
+are more likely to retire). 
+
+There are several potential causes for this. One of them is the lack of 'the feeling
+of accomplishment' by younger employees. Younger employees want to make an impact 
+[ref](https://uwaterloo.ca/hire/four-reasons-young-employees-leave-jobs). Another 
+is the lack of challenge or growth in the workplace. Younger employees tend to get 
+bored with their jobs quickly if it doesn't provide them with the opportunities 
+to showcase their skills and abilities [ref](https://medium.com/@staffcircle/reasons-why-young-workers-leave-their-jobs-and-look-for-more-stable-work-ad35e1febc01).
+
+There could be other factors in play here such as the relationship with their 
+employers or coworkers, or low salaries, but it is difficult to determine their 
+significance using the current dataset.
+
+##### 5.1.2.1 Termination Reason by Hire Age (count)
+```{r}
+df3 %>%
+  filter(STATUS == 'TERMINATED') %>%
+  count(hire_age, termreason_desc) %>%
+  ggplot(aes(n, as.factor(hire_age), fill = termreason_desc, label = n)) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  geom_text(position = position_fill(vjust = 0.5)) +
+  labs(
+    title = 'Ratio of Termination Reasons in Hire Ages (Number of Employees)',
+    x = 'Percentage',
+    y = 'Hire Age',
+    fill = 'Termination Reason'
+  )
+```
+
+#### 5.1.3 Correlation Between Age of Hire and Tenure
+```{r}
+df3 %>%
+  filter(STATUS == 'TERMINATED') %>%
+  ggplot(aes(hire_age, length_of_service, color = termreason_desc)) +
+  geom_point() +
+  labs(
+    title = 'Correlation between Hire Age and Tenure',
+    x = 'Hire Age',
+    y = 'Tenure',
+    color = 'Termination Reason'
+  )
+```
+Same as section [4.1.3](#tenure-until-resignation)), hire age also has 
+correlation with tenure. The correlation coefficient this time is:
+```{r}
+cor(df3$hire_age, df3$length_of_service)
+```
+Which is lower than with termination age, but can still be considered a high value. 
+Hire age is a more useful variable as it can be used to predict the expected employee tenure.
+
+### 5.2 Answer
+Based on the above analyses, it can be concluded that age, more specifically the 
+age during hire, can influence employee attrition. Younger employees are more 
+likely to resign due to reasons such as the boredom or the lack of acomplishment. 
+Other than that, the hire age can also be used to predict employee tenure.
+
+### 5.3 Reccomendations
+Since the employees that are most likely to leave the company are younger ones, 
+it should benefit the company to focus more on them. Since this is a retail 
+company, it might be difficult to give them a sense of achievement or more 
+challenges. 
+
+One thing they can do is to give them more responsibilities. The 
+company can assigned a few employees to handle an event such as a limited time 
+event, which can be specific to a store or a city. This can provide employees 
+the chance for them to show their skills, and also give them the engagement needed 
+to not get bored working there.
+
+## 6.0 Question 3: How Does Jobs Affect Employee Attrition
+Refering to the analyses at section [4.1.8](#418_Job_Title), there are several 
+jobs that have higher number of terminations. In this section, I will do deeper 
+analyses to try to understand why this happened.
+
+### 6.1 Analyses
+#### 6.1.1 Ratio of Termination Reasons by Job {.tabset}
+##### 6.1.1.1 Resignations by Job (percentage)
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED') %>%
+  count(job_title, termreason_desc) %>%
+  group_by(job_title) %>%
+  mutate(ng = sum(n),
+         np = round(n / ng, 2) * 100) %>%
+  ggplot(aes(n, reorder(job_title, n),
+             fill = termreason_desc,
+             label = paste(np, '%', sep = ''))) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  geom_text(position = position_fill(vjust = 0.5)) +
+  labs(
+    title = 'Ratio of Termination Reasons in Job Titles (Percentage)',
+    x = 'Percentage',
+    y = 'Job Title',
+    fill = 'Termination Reason'
+  )
+```
+By looking at the ratio of termination reasons in each job, you can see that 
+cashiers and shelf stockers have quite a lot more resignations compared to 
+retirements and layoffs. Following these 2 are dairy persons and bakers. Meat 
+cutters and produce clerks have the most retirements, both in count and in ratio.
+
+From this chart alone, it can be inferred that specific jobs, like cashiers, can 
+be held accountable for termination. Before coming to this conclusion, I will 
+verify first that the department is not responsible for this, since jobs belong 
+to departments. I'll need to check if the jobs of interest belong to the same 
+department or not.
+
+##### 6.1.1.2 Resignations by Job (count)
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED') %>%
+  count(job_title, termreason_desc) %>%
+  ggplot(aes(n, reorder(job_title, n), fill = termreason_desc, label = n)) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  geom_text(position = position_fill(vjust = 0.5)) +
+  labs(
+    title = 'Ratio of Termination Reasons in Job Titles (Count)',
+    x = 'Percentage',
+    y = 'Job Title',
+    fill = 'Termination Reason'
+  )
+```
+
+#### 6.1.2 Ratio of Termination Reasons by Department {.tabset}
+##### 6.1.2.1 Resignations by Department (percentage)
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED') %>%
+  count(department_name, termreason_desc) %>%
+  group_by(department_name) %>%
+  mutate(ng = sum(n),
+         np = round(n / ng, 2) * 100) %>%
+  ggplot(aes(n, reorder(department_name, n),
+             fill = termreason_desc,
+             label = paste(np, '%', sep = ''))) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  geom_text(position = position_fill(vjust = 0.5)) +
+  labs(
+    title = 'Ratio of Termination Reasons in Departments (Percentage)',
+    x = 'Percentage',
+    y = 'Department Name',
+    fill = 'Termination Reason'
+  )
+```
+Here are some checks to help verify the previous section's statements. The charts 
+here look similiar to the previous section's. The ratio of termination reasons 
+doesn't look far off as well. It can be concluded that the main factor here is 
+the jobs themselves, not including the departments.
+
+p.s:
+Some of the departments have very little employees. These are the departments 
+under the head office business unit. The ones with a lot of employees are from 
+the stores business unit.
+
+##### 6.1.2.2 Resignations by Department (count)
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED') %>%
+  count(department_name, termreason_desc) %>%
+  ggplot(aes(n, reorder(department_name, n), fill = termreason_desc, label = n)) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  geom_text(position = position_fill(vjust = 0.5)) +
+  labs(
+    title = 'Ratio of Termination Reasons in Departments (Count)',
+    x = 'Percentage',
+    y = 'Department Name',
+    fill = 'Termination Reason'
+  )
+```
+
+#### 6.1.3 Jobs and Their Parent Departments
+```{r}
+df2 %>% count(department_name, job_title)
+```
+It can be seen from this table that the top 6 jobs from section 
+[6.1.1](#611_Ratio_of_Termination_Reasons_by_Job) is in different departments.
+I will analyze cashiers and shelf stockers specificaly, to find out if there is 
+something in common to them that might lead to resignation.
+
+#### 6.1.4 Further Analysis on Cashiers and Shelf Stockers
+##### 6.1.4.1 Cashiers {.tabset}
+###### 6.1.4.1.1 Age
+```{r}
+cashiers <- df2 %>% filter(job_title == 'Cashier')
+
+cashiers %>%
+  ggplot(aes(age)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = seq(20, 70, 5)) +
+  labs(
+    title = 'Distribution of Termination Age of Cashiers',
+    x = 'Age',
+    y = 'Number of Employees'
+  )
+```
+Nothing stands out here. These results look similiar to previous analyses. One 
+minor thing to point out is that there are slightly more males here.
+
+###### 6.1.4.1.2 Length of Service
+```{r}
+cashiers %>%
+  ggplot(aes(length_of_service)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = seq(0, 25, 5)) +
+  labs(
+    title = 'Distribution of Tenure of Cashiers',
+    x = 'Tenure',
+    y = 'Number of Employees'
+  )
+```
+
+###### 6.1.4.1.3 Gender
+```{r}
+cashiers %>%
+  count(gender_full) %>%
+  ggplot(aes(n, gender_full)) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Cashiers by Gender',
+    x = 'Number of Employees',
+    y = 'Gender'
+  )
+```
+
+###### 6.1.4.1.4 City
+```{r}
+cashiers %>%
+  count(city_name) %>%
+  ggplot(aes(x = n, y = reorder(city_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Cashiers Grouped by City',
+    x = 'Number of Employees',
+    y = 'City Name'
+  )
+```
+
+###### 6.1.4.1.5 Store
+```{r}
+store %>%
+  filter(job_title == 'Cashier') %>%
+  count(store_name) %>%
+  ggplot(aes(x = n, y = reorder(store_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Cashiers Grouped by Store',
+    x = 'Number of Employees',
+    y = 'Store Name'
+  )
+```
+
+##### 6.1.4.2 Shelf Stocker {.tabset}
+###### 6.1.4.2.1 Age
+```{r}
+stockers <- df2 %>% filter(job_title == 'Shelf Stocker')
+
+stockers %>%
+  ggplot(aes(age)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = seq(20, 70, 5)) +
+  labs(
+    title = 'Distribution of Termination Age of Shelf Stockers',
+    x = 'Age',
+    y = 'Number of Employees'
+  )
+```
+The results here are quite normal too. However, just like cashiers, there are 
+more male employees than females. This might mean that men are more likely to 
+resign, but more analysis is needed to verify this claim. It will be done in the 
+later section.
+
+###### 6.1.4.2.2 Length of Service
+```{r}
+stockers %>%
+  ggplot(aes(length_of_service)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = seq(0, 25, 5)) +
+  labs(
+    title = 'Distribution of Tenure of Shelf Stockers',
+    x = 'Tenure',
+    y = 'Number of Employees'
+  )
+```
+
+###### 6.1.4.2.3 Gender
+```{r}
+stockers %>%
+  count(gender_full) %>%
+  ggplot(aes(n, gender_full)) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Shelf Stockers by Gender',
+    x = 'Number of Employees',
+    y = 'Gender'
+  )
+```
+
+###### 6.1.4.2.4 City
+```{r}
+stockers %>%
+  count(city_name) %>%
+  ggplot(aes(x = n, y = reorder(city_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Shelf Stockers Grouped by City',
+    x = 'Number of Employees',
+    y = 'City Name'
+  )
+```
+
+###### 6.1.4.2.5 Store
+```{r}
+store %>%
+  filter(job_title == 'Shelf Stocker') %>%
+  count(store_name) %>%
+  ggplot(aes(x = n, y = reorder(store_name, n))) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Count of Shelf Stockers Grouped by Store',
+    x = 'Number of Employees',
+    y = 'Store Name'
+  )
+```
+
+### 6.2 Answer
+Based on these analyses only, there doesn't seem to be anything that could 
+explain why some jobs have higher termination rates than others. However, this 
+can be explained by including job satisfaction and salary in to the equation.
+
+This dataset contains data of employees from British Columbia (BC), Canada, so 
+I will be gathering external data specific to this region. Cashiers and shelf 
+stockers in BC have below average salary and job satisfaction. The average 
+living cost in BC is $1,839 a month for 1 person and the average salary 
+after taxes is $3,048 [ref](https://livingcost.org/cost/canada/bc).
+
+The average salaries in BC are $2,559 a month for cashiers 
+([ref](https://ca.talent.com/salary?job=cashier)) and $2,600 a month 
+for shelf stockers ([ref](https://ca.talent.com/salary?job=shelf+stocker)). 
+Both are lower than the average, which may cause employees to quit their jobs 
+to find a better paying one. Also cashiers deal with stressful working conditions 
+often such as rude customers and terrible bosses. This can also cause them to 
+look for a job with better working conditions.
+
+### 6.3 Reccomendations
+A simple solution that can help to reduce resignations in these jobs is to 
+increase the salary. However, it is not reccommended to be raised more than 
+$3,000, the average, as any more would not be beneficial for the company. 
+Also raising the salary doesn't help fix the job dissatisfaction. For that, a 
+fix could be to improve the working conditions. It can be implemented in several 
+ways such as providing free lunch or snacks, more break times, giving awards, etc.
+
+## 7.0 Question 4: How Does Gender Affect Employee Attrition?
+This section aims to answer the questions from section [4.1.5](#415_Gender) and 
+section [6.1.4](#614_Further_Analysis_on_Cashiers_and_Shelf_Stockers).
+
+### 7.1 Analyses
+#### 7.1.1 Ratio of Termination Reasons by Gender
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED') %>% 
+  count(gender_full, termreason_desc) %>%
+  group_by(gender_full) %>%
+  mutate(ng = sum(n),
+         np = round(n / ng, 2) * 100) %>%
+  ggplot(aes(x = n, y = gender_full,
+             fill = termreason_desc,
+             label = paste(np, '% (', n, ')', sep = ''))) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  geom_text(position = position_fill(vjust = 0.5), size = 3) +
+  labs(
+    title = 'Ratio of Termination Reasons in Each Gender',
+    x = 'Percentage',
+    y = 'Gender',
+    fill = 'Termination Reason'
+  )
+```
+The ratio for both male and female is quite similiar, with females being a little 
+bit more 'loyal' to the company, because of the larger ratio of retirements over 
+resignations and layoffs.
+
+#### 7.1.2 Tenure by Gender
+```{r}
+df2 %>%
+  group_by(gender_full) %>%
+  summarise(avg_tenure = sum(length_of_service) / n()) %>%
+  ggplot(aes(gender_full, avg_tenure)) +
+  geom_bar(stat = 'identity') +
+  labs(
+    title = 'Average Tenure of Employees Grouped by Gender',
+    x = 'Gender',
+    y = 'Average Tenure'
+  )
+```
+This backs up the previous section's statement, as the average length of service 
+of females is a little bit longer than males.
+
+#### 7.1.3 Age of Hire Distribution by Gender
+```{r}
+df3 %>%
+  ggplot(aes(hire_age, gender_full, fill = gender_full)) +
+  geom_violin() +
+  labs(
+    title = 'Distribution of Hire Age Grouped by Gender',
+    x = 'Hire Age',
+    y = 'Gender',
+    fill = 'Gender'
+  )
+```
+Nothing interesting here. The distributions are similiar to the ones in section 
+[5.1.1](#511_Age_During_Hire). Gender and hire age doesn't seem to be correlated.
+
+#### 7.1.4 Termination Reasons of Gender Grouped by Job
+##### 7.1.4.1 Cashiers and Shelf Stockers
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED' &
+         job_title %in% c('Cashier', 'Shelf Stocker')) %>% 
+  count(gender_full, termreason_desc, job_title) %>%
+  group_by(gender_full) %>%
+  mutate(ng = sum(n),
+         np = round(n / ng, 2) * 100) %>%
+  ggplot(aes(x = n, y = gender_full,
+             fill = termreason_desc,
+             label = paste(np, '% (', n, ')', sep = ''))) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  geom_text(position = position_fill(vjust = 0.5), size = 3) +
+  facet_wrap(~job_title, ncol = 1) +
+  labs(
+    title = 'Ratio of Cashier & Shelf Stocker Termination Reasons by Gender',
+    x = 'Percentage',
+    y = 'Gender',
+    fill = 'Termination Reason'
+  )
+```
+Male cashiers are slightly more likely to resign than female cashiers. Shelf 
+stockers however, have more female employee resignations than male. This means 
+that gender might not be affecting resignation. Shelf stocker ratios are the 
+oposite of cashiers.
+
+##### 7.1.4.2 Top 10 Jobs by Number of Employees
+```{r}
+df2 %>%
+  filter(STATUS == 'TERMINATED') %>% 
+  filter(job_title %in% (
+    df2 %>% count(job_title) %>% arrange(desc(n)) %>% head(10) %>% .$job_title
+  )) %>%
+  count(gender_full, termreason_desc, job_title) %>%
+  group_by(job_title, gender_full) %>%
+  mutate(ng = sum(n),
+         np = round(n / ng, 2) * 100) %>%
+  ggplot(aes(n, gender_full,
+             fill = termreason_desc,
+             label = paste(np, '%', sep = ''))) +
+  geom_bar(stat = 'identity', position = 'fill') +
+  geom_text(position = position_fill(vjust = 0.5), size = 3) +
+  facet_wrap(~job_title) +
+  labs(
+    title = 'Ratio of Termination Reasons by Gender of Top 10 Jobs',
+    x = 'Percentage',
+    y = 'Gender',
+    fill = 'Termination Reason'
+  )
+```
+There doesn't seem to be any noticable patterns in resignation of both genders 
+in different jobs. This analysis further strengthens the claim in the previous 
+section about gender not influencing resignation. However, most of the jobs have 
+more male employee layoffs then female. This is align with the analysis in section 
+[7.1.1](#711_Ratio_of_Termination_Reasons_by_Gender).
+
+### 7.2 Answer
+Gender doesn't seem to affect termination much, but based on these analyses, in 
+general female employees are less likely to resign or be laid off. It is difficult 
+to explain why this could have happened from the given data alone. Reasons for this 
+was discussed in a survey conducted by LinkedIn 
+([ref](https://www.linkedin.com/business/talent/blog/talent-strategy/why-women-are-leaving-their-jobs)).
+
+### 7.3 Reccomendations
+
+## 8.0 Question 5: What Causes Employee Layoff?
+The layoffs in the company happened only at the year 2014 and 2015, so there isn't 
+a lot of data on layoffs. Some clues are found in section [4.1.10.3](#layoffs-by-store), 
+and will be analyzed further here, but it is difficult to say just from the data 
+alone, what makes an employee more likely to be laid off.
+
+### 8.1 Analyses
+#### 8.1.1 Employee Status by Store {.tabset}
+##### 8.1.1.1 Ratio of Employee Status by Store (percentage)
+```{r}
+store %>%
+  group_by(store_name, termreason_desc) %>%
+  count() %>%
+  group_by(store_name) %>%
+  mutate(ng = sum(n),
+         np = round(n / ng, 2) * 100) %>%
+  ggplot(aes(n, reorder(store_name, n),
+             fill = termreason_desc,
+             label = paste(np, '%', sep = ''))) +
+  geom_bar(stat = 'identity', position = 'fill') + 
+  geom_text(position = position_fill(vjust = 0.5)) +
+  labs(
+    title = 'Ratio of Active & Terminated Employees by Store (Percentage)',
+    x = 'Percentage',
+    y = 'Store Name',
+    fill = 'Termination Reason'
+  )
+```
+This analysis is the continuation from section 4.1.10. Just like before, the 
+stores listed here have been filtered to exclude stores with very few employees. 
+We can see that stores 11, 13, and 20 have the largest ratio of layoffs. Also, 
+they do not have any more active employees. This could mean that the store has 
+shut down, or they have stopped sharing their employee data. The data provided 
+is not enough to explain this. 
+
+The same goes to store 37, with over 90% of their employees retired, and the 
+rest laid off. Store 35 might be soon following as only around 6% of their 
+employees are still active.
+
+##### 8.1.1.2 Ratio of Employee Status by Store (count)
+```{r}
+store %>%
+  group_by(store_name, termreason_desc) %>%
+  count() %>%
+  ggplot(aes(n, reorder(store_name, n), fill = termreason_desc, label = n)) +
+  geom_bar(stat = 'identity', position = 'fill') + 
+  geom_text(position = position_fill(vjust = 0.5)) +
+  labs(
+    title = 'Ratio of Active & Terminated Employees by Store (Count)',
+    x = 'Percentage',
+    y = 'Store Name',
+    fill = 'Termination Reason'
+  )
+```
+
+#### 8.1.2 Employee Terminations by Store {.tabset}
+##### 8.1.2.1 Ratio of Termination Reasons by Store (percentage)
+```{r}
+store %>%
+  filter(STATUS == 'TERMINATED') %>%
+  group_by(store_name, termreason_desc) %>%
+  count() %>%
+  group_by(store_name) %>%
+  mutate(ng = sum(n),
+         np = round(n / ng, 2) * 100) %>%
+  ggplot(aes(n, reorder(store_name, n),
+             fill = termreason_desc,
+             label = paste(np, '%', sep = ''))) +
+  geom_bar(stat = 'identity', position = 'fill') + 
+  geom_text(position = position_fill(vjust = 0.5)) +
+  labs(
+    title = 'Ratio of Terminated Reasons by Store (Percentage)',
+    x = 'Percentage',
+    y = 'Store Name',
+    fill = 'Termination Reason'
+  )
+```
+This is the chart from the previous section, excluding the active employees. 
+The stores with 100% resignation rate is interesting, and further analysis on 
+them might lead to new insights, but for this section I will be focusing only 
+on layoffs. That means I will narrow down the analysis to just 3 stores: 11, 13, 
+and 20.
+
+##### 8.1.2.2 Ratio of Termination Reasons by Store (count)
+```{r}
+store %>%
+  filter(STATUS == 'TERMINATED') %>%
+  group_by(store_name, termreason_desc) %>%
+  count() %>%
+  ggplot(aes(n, reorder(store_name, n), fill = termreason_desc, label = n)) +
+  geom_bar(stat = 'identity', position = 'fill') + 
+  geom_text(position = position_fill(vjust = 0.5)) +
+  labs(
+    title = 'Ratio of Terminated Reasons by Store (Count)',
+    x = 'Percentage',
+    y = 'Store Name',
+    fill = 'Termination Reason'
+  )
+```
+
+#### 8.1.3 Which Cities Are The Stores In?
+```{r}
+df2 %>%
+  group_by(city_name) %>%
+  summarise(stores = toString(unique(store_name))) %>%
+  arrange(desc(stringr::str_length(stores)))
+```
+The stores of interest are all from different cities, so city is most likely not 
+a factor here.
+
+#### 8.1.4 Hire Age Distribution in Certain Stores
+```{r}
+# dataframe with only stores 11, 13, 20
+certain_store <- store %>% filter(store_name %in% c(11, 13, 20))
+
+df3 %>%
+  filter(STATUS == 'TERMINATED' & store_name %in% certain_store$store_name) %>%
+  ggplot(aes(hire_age)) +
+  geom_histogram(binwidth = 1) +
+  facet_wrap(~store_name, ncol = 1) +
+  labs(
+    title = 'Distribution of Hire Age of Certain Stores',
+    x = 'Hire Age',
+    y = 'Number of Employees'
+  )
+```
+Again, nothing unusual here.
+
+#### 8.1.5 Gender Ratio in Certain Stores {.tabset}
+##### 8.1.5.1 Gender Ratio in Certain Stores (percentage)
+```{r}
+certain_store%>%
+  ggplot(aes(gender_full)) + 
+  geom_bar() +
+  facet_wrap(~store_name)
+```
+Gender distribution in these stores don't seem to follow a pattern. 
+
+### 8.2 Answer
+Based on the analyses in this section, the conclusion I've reached is that the 
+reasons for layoffs cannot be determined from the provided data alone. The most 
+probable reason now is the closing of several stores. This statement can be backed 
+by this article from indeed [[ref](https://www.indeed.com/career-advice/career-development/reasons-for-layoffs)] 
+which states business closing as one of the reasons for employee layoff.
+

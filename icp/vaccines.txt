@@ -1,0 +1,6 @@
+vac_name,vac_code,vac_country,vac_dosage,vac_pop_covered,vac_quantity
+Pfitzer,PF,USA,2,50,9
+Sinovac,SV,China,2,18.8,3
+AstraZeneca,AZ,UK,2,10,0
+Sputnik V,SP,Russia,2,10,6
+CanSinoBio,CS,China,1,10.9,8

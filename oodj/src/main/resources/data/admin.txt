@@ -1,0 +1,7 @@
+admin_id,admin_name,admin_email,admin_password,admin_phone,admin_deleted
+1,amardeep,amardeep@mail.apu.edu.my,f565deb1a94888b64ba87de380c45233,123456,0
+2,p,p,83878c91171338902e0fe0fb97a8c47a,123456,1
+3,a,a,0cc175b9c0f1b6a831c399e269772661,a,0
+4,sivananthan,sivananthan@mail.apu.edu.my,202cb962ac59075b964b07152d234b70,+6012345678,0
+5,sivaguru,s@s.s,03c7c0ace395d80182db07ae2c30f034,+6012381928,0
+6,noris,nrs@gmail.com,ff4fe0011409dcc5ee486f826c1d3efb,+601238108100,0
